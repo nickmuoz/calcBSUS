@@ -6,7 +6,7 @@ const ExchangeCalculator = () => {
   const [currencyTo, setCurrencyTo] = useState('BS');
   const [exchangeRateUSDToBS, setExchangeRateUSDToBS] = useState(null);
   const [exchangeRateCOPToUSD, setExchangeRateCOPToUSD] = useState(null);
-  const [exchangeRateCOPToBS, setExchangeRateCOPToBS] = useState(null);
+  const [exchangeRateBSToCOP, setExchangeRateBStoCOP] = useState(null);
   const [result, setResult] = useState('');
 
   useEffect(() => {
@@ -20,9 +20,10 @@ const ExchangeCalculator = () => {
         const dataCOPToUSD = await responseCOPToUSD.json();
         setExchangeRateCOPToUSD(dataCOPToUSD.rates.COP);
 
-        const responseCOPToBS = await fetch('https://api.exchangerate-api.com/v4/latest/COP');
+        const responseCOPToBS = await fetch('https://api.exchangerate-api.com/v4/latest/VES');
         const dataCOPToBS = await responseCOPToBS.json();
-        setExchangeRateCOPToBS(dataCOPToBS.rates.VES);
+        setExchangeRateBStoCOP(dataCOPToBS.rates.COP);
+        console.log(exchangeRateBSToCOP)
       } catch (error) {
         console.error('Error fetching exchange rates:', error);
       }
@@ -48,11 +49,11 @@ const ExchangeCalculator = () => {
   };
 
   const convertCOPToBS = (amount) => {
-    return amount / exchangeRateCOPToBS;
+    return amount / exchangeRateBSToCOP;
   };
 
   const convertBSToCOP = (amount) => {
-    return amount * exchangeRateCOPToBS;
+    return amount * exchangeRateBSToCOP;
   };
 
   const handleAmountChange = (event) => {
@@ -99,7 +100,7 @@ const ExchangeCalculator = () => {
         return;
     }
 
-    setResult(`${amount} ${currencyFrom} = ${convertedAmount.toFixed(2)} ${currencyTo}`);
+    setResult(`${amount} ${currencyFrom} = ${convertedAmount.toFixed(3)} ${currencyTo}`);
   };
 
   return (
