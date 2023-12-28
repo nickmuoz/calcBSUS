@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import Icono from "../assets/img/icoinstagram.svg";
+import Icono2 from "../assets/img/icofacebook.svg";
+import Icono3 from '../assets/img/icolinkedin.svg';
 
 const ExchangeCalculator = () => {
   const [amount, setAmount] = useState('');
@@ -115,7 +118,6 @@ const ExchangeCalculator = () => {
             <input type="number" value={amount} onChange={handleAmountChange} />
           </label>
         </div>
-      </main>
       <br />
       <div>
         <label>
@@ -141,6 +143,25 @@ const ExchangeCalculator = () => {
         Convertir
       </button>
       {result && <div>{result}</div>}
+      </main>
+      <br/>
+      <br/>
+      <footer >
+      <div>
+        <a href="https://www.facebook.com/nicolas.m.salcedo.9">
+          <image src={Icono2} alt="facebook" />
+        </a>
+        <a href="https://www.instagram.com/nickmuoz/">
+          <image src={Icono} alt="instagram" />
+        </a>
+        <a href="https://www.linkedin.com/in/nicolas-munoz-salcedo/">
+            <image src={Icono3} alt="linkedin" />
+          </a>
+      </div>
+        <span>
+        Hecho con &#128151; <a href="https://nicolasmuozapp.netlify.app/">por Nicolas Muñoz</a>
+        </span>
+        </footer>
     </div>
   );
 };
