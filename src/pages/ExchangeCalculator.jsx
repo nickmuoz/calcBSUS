@@ -4,22 +4,56 @@ const ExchangeCalculator = () => {
   const [amount, setAmount] = useState('');
   const [currencyFrom, setCurrencyFrom] = useState('USD');
   const [currencyTo, setCurrencyTo] = useState('BS');
-  const [exchangeRate, setExchangeRate] = useState(null);
+  const [exchangeRateUSDToBS, setExchangeRateUSDToBS] = useState(null);
+  const [exchangeRateCOPToUSD, setExchangeRateCOPToUSD] = useState(null);
+  const [exchangeRateCOPToBS, setExchangeRateCOPToBS] = useState(null);
   const [result, setResult] = useState('');
 
   useEffect(() => {
-    const fetchExchangeRate = async () => {
+    const fetchExchangeRates = async () => {
       try {
-        const response = await fetch('https://apicalculadora.fly.dev/exchange/usd-bs');
-        const data = await response.json();
-        setExchangeRate(data.USDTOBOLIVAR);
+        const responseUSDToBS = await fetch('https://apicalculadora.fly.dev/exchange/usd-bs');
+        const dataUSDToBS = await responseUSDToBS.json();
+        setExchangeRateUSDToBS(dataUSDToBS.USDTOBOLIVAR);
+
+        const responseCOPToUSD = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+        const dataCOPToUSD = await responseCOPToUSD.json();
+        setExchangeRateCOPToUSD(dataCOPToUSD.rates.COP);
+
+        const responseCOPToBS = await fetch('https://api.exchangerate-api.com/v4/latest/COP');
+        const dataCOPToBS = await responseCOPToBS.json();
+        setExchangeRateCOPToBS(dataCOPToBS.rates.VES);
       } catch (error) {
-        console.error('Error Opteniendo el cambio:', error);
+        console.error('Error fetching exchange rates:', error);
       }
     };
 
-    fetchExchangeRate();
+    fetchExchangeRates();
   }, []);
+
+  const convertUSDToBS = (amount) => {
+    return amount * exchangeRateUSDToBS;
+  };
+
+  const convertBSToUSD = (amount) => {
+    return amount / exchangeRateUSDToBS;
+  };
+
+  const convertCOPToUSD = (amount) => {
+    return amount / exchangeRateCOPToUSD;
+  };
+
+  const convertUSDToCOP = (amount) => {
+    return amount * exchangeRateCOPToUSD;
+  };
+
+  const convertCOPToBS = (amount) => {
+    return amount / exchangeRateCOPToBS;
+  };
+
+  const convertBSToCOP = (amount) => {
+    return amount * exchangeRateCOPToBS;
+  };
 
   const handleAmountChange = (event) => {
     setAmount(event.target.value);
@@ -40,45 +74,71 @@ const ExchangeCalculator = () => {
       return;
     }
 
-    if (exchangeRate === null) {
-      setResult('Trayendo tasa de cambio, por favor espere...');
-      return;
+    let convertedAmount;
+    switch (`${currencyFrom}_${currencyTo}`) {
+      case 'USD_BS':
+        convertedAmount = convertUSDToBS(inputAmount);
+        break;
+      case 'BS_USD':
+        convertedAmount = convertBSToUSD(inputAmount);
+        break;
+      case 'COP_USD':
+        convertedAmount = convertCOPToUSD(inputAmount);
+        break;
+      case 'USD_COP':
+        convertedAmount = convertUSDToCOP(inputAmount);
+        break;
+      case 'COP_BS':
+        convertedAmount = convertCOPToBS(inputAmount);
+        break;
+      case 'BS_COP':
+        convertedAmount = convertBSToCOP(inputAmount);
+        break;
+      default:
+        setResult('Invalid conversion.');
+        return;
     }
-
-    const convertedAmount =
-      currencyFrom === 'USD' ? inputAmount * exchangeRate : inputAmount / exchangeRate;
 
     setResult(`${amount} ${currencyFrom} = ${convertedAmount.toFixed(2)} ${currencyTo}`);
   };
 
   return (
     <div>
-      <h1>Calculadora para cambio de Dolares y Bolivares</h1>
+      <nav>
+        <h2>Calculadora para cambio de Monedas</h2>
+      </nav>
+      <main>
+        <div>
+          <label>
+            Cantidad: {''}
+            <input type="number" value={amount} onChange={handleAmountChange} />
+          </label>
+        </div>
+      </main>
+      <br />
       <div>
         <label>
-          Cantidad:
-          <input type="number" value={amount} onChange={handleAmountChange} />
-        </label>
-      </div>
-      <div>
-        <label>
-          De:
+          De: {''}
           <select value={currencyFrom} onChange={handleCurrencyFromChange}>
             <option value="USD">USD</option>
+            <option value="COP">COP</option>
             <option value="BS">BS</option>
           </select>
         </label>
       </div>
       <div>
         <label>
-          A:
+          A: {''}
           <select value={currencyTo} onChange={handleCurrencyToChange}>
-            <option value="USD">USD</option>
             <option value="BS">BS</option>
+            <option value="USD">USD</option>
+            <option value="COP">COP</option>
           </select>
         </label>
       </div>
-      <button onClick={handleConvert}>Convertir</button>
+      <button className="btn-primary" onClick={handleConvert}>
+        Convertir
+      </button>
       {result && <div>{result}</div>}
     </div>
   );
