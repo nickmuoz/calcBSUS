@@ -159,7 +159,7 @@ const ExchangeCalculator = () => {
           </a>
       </div>
         <span>
-        Hecho con &#128151; <a href="https://nicolasmuozapp.netlify.app/">por Nicolas Muñoz</a>
+        Hecho con &#128151; por<a href="https://nicolasmuozapp.netlify.app/"> Nicolas Muñoz</a>
         </span>
         </footer>
     </div>
