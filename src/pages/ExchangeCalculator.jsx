@@ -11,6 +11,10 @@ const ExchangeCalculator = () => {
   const [exchangeRateCOPToUSD, setExchangeRateCOPToUSD] = useState(null);
   const [exchangeRateBSToCOP, setExchangeRateBStoCOP] = useState(null);
   const [result, setResult] = useState('');
+  const [exchangerateType, setExchangeRate] = useState({
+    exchangeRatetype: 'OFICIAL'
+  });
+  const [manualExchangeRate, setManualExchangeRate] = useState('');
 
   useEffect(() => {
     const fetchExchangeRates = async () => {
@@ -26,7 +30,6 @@ const ExchangeCalculator = () => {
         const responseCOPToBS = await fetch('https://api.exchangerate-api.com/v4/latest/VES');
         const dataCOPToBS = await responseCOPToBS.json();
         setExchangeRateBStoCOP(dataCOPToBS.rates.COP);
-        console.log(exchangeRateBSToCOP)
       } catch (error) {
         console.error('Error fetching exchange rates:', error);
       }
@@ -35,28 +38,14 @@ const ExchangeCalculator = () => {
     fetchExchangeRates();
   }, []);
 
-  const convertUSDToBS = (amount) => {
-    return amount * exchangeRateUSDToBS;
+  const handleExchangeRateTypeChange = (event) => {
+    setExchangeRate({
+      exchangeRatetype: event.target.value
+    });
   };
 
-  const convertBSToUSD = (amount) => {
-    return amount / exchangeRateUSDToBS;
-  };
-
-  const convertCOPToUSD = (amount) => {
-    return amount / exchangeRateCOPToUSD;
-  };
-
-  const convertUSDToCOP = (amount) => {
-    return amount * exchangeRateCOPToUSD;
-  };
-
-  const convertCOPToBS = (amount) => {
-    return amount / exchangeRateBSToCOP;
-  };
-
-  const convertBSToCOP = (amount) => {
-    return amount * exchangeRateBSToCOP;
+  const handleManualExchangeRateChange = (event) => {
+    setManualExchangeRate(event.target.value);
   };
 
   const handleAmountChange = (event) => {
@@ -73,37 +62,43 @@ const ExchangeCalculator = () => {
 
   const handleConvert = () => {
     const inputAmount = parseFloat(amount);
+
     if (isNaN(inputAmount)) {
       setResult('Por Favor Ingrese un Numero Valido.');
       return;
     }
 
     let convertedAmount;
+    let exchangeRate;
+
+    if (exchangerateType.exchangeRatetype === 'MANUAL') {
+      exchangeRate = parseFloat(manualExchangeRate);
+    } else {
+      switch (currencyFrom) {
+        case 'USD':
+          exchangeRate = exchangeRateUSDToBS;
+          break;
+        // Add other cases for different currencies
+        default:
+          setResult('Invalid currency selection.');
+          return;
+      }
+    }
+
     switch (`${currencyFrom}_${currencyTo}`) {
       case 'USD_BS':
-        convertedAmount = convertUSDToBS(inputAmount);
+        convertedAmount = inputAmount * exchangeRate;
         break;
       case 'BS_USD':
-        convertedAmount = convertBSToUSD(inputAmount);
+        convertedAmount = inputAmount / exchangeRate;
         break;
-      case 'COP_USD':
-        convertedAmount = convertCOPToUSD(inputAmount);
-        break;
-      case 'USD_COP':
-        convertedAmount = convertUSDToCOP(inputAmount);
-        break;
-      case 'COP_BS':
-        convertedAmount = convertCOPToBS(inputAmount);
-        break;
-      case 'BS_COP':
-        convertedAmount = convertBSToCOP(inputAmount);
-        break;
+      // Add other cases for different currency conversions
       default:
         setResult('Invalid conversion.');
         return;
     }
 
-    setResult(`${amount} ${currencyFrom} = ${convertedAmount.toFixed(3)} ${currencyTo}`);
+    setResult(`${inputAmount} ${currencyFrom} = ${convertedAmount.toFixed(3)} ${currencyTo}`);
   };
 
   return (
@@ -114,54 +109,93 @@ const ExchangeCalculator = () => {
       <main>
         <div>
           <label>
+            Seleccione Tipo de Tasa de Cambio:
+          </label>
+          <div>
+            <label>
+              <input
+                type="radio"
+                value="OFICIAL"
+                checked={exchangerateType.exchangeRatetype === 'OFICIAL'}
+                onChange={handleExchangeRateTypeChange}
+              />
+              Oficial
+            </label>
+            <label>
+              <input
+                type="radio"
+                value="MANUAL"
+                checked={exchangerateType.exchangeRatetype === 'MANUAL'}
+                onChange={handleExchangeRateTypeChange}
+              />
+              Manual
+            </label>
+          </div>
+        </div>
+        {exchangerateType.exchangeRatetype === 'MANUAL' ? (
+          <div>
+            <label>
+              Tasa de Cambio Manual: {''}
+              <input
+                type="number"
+                value={manualExchangeRate}
+                onChange={handleManualExchangeRateChange}
+              />
+            </label>
+          </div>
+        ) : (
+          <></>
+        )}
+        <div>
+          <label>
+            De: {''}
+            <select value={currencyFrom} onChange={handleCurrencyFromChange}>
+              <option value="USD">USD</option>
+              <option value="COP">COP</option>
+              <option value="BS">BS</option>
+            </select>
+          </label>
+        </div>
+        <div>
+          <label>
             Cantidad: {''}
             <input type="number" value={amount} onChange={handleAmountChange} />
           </label>
         </div>
-      <br />
-      <div>
-        <label>
-          De: {''}
-          <select value={currencyFrom} onChange={handleCurrencyFromChange}>
-            <option value="USD">USD</option>
-            <option value="COP">COP</option>
-            <option value="BS">BS</option>
-          </select>
-        </label>
-      </div>
-      <div>
-        <label>
-          A: {''}
-          <select value={currencyTo} onChange={handleCurrencyToChange}>
-            <option value="BS">BS</option>
-            <option value="USD">USD</option>
-            <option value="COP">COP</option>
-          </select>
-        </label>
-      </div>
-      <button className="btn-primary" onClick={handleConvert}>
-        Convertir
-      </button>
-      {result && <div>{result}</div>}
+        <br />
+        <div>
+          <label>
+            A: {''}
+            <select value={currencyTo} onChange={handleCurrencyToChange}>
+              <option value="BS">BS</option>
+              <option value="USD">USD</option>
+              <option value="COP">COP</option>
+            </select>
+          </label>
+        </div>
+        <button className="btn-primary" onClick={handleConvert}>
+          Convertir
+        </button>
+        {result && <div>{result}</div>}
       </main>
-      <br/>
-      <br/>
-      <footer >
-      <div>
-        <a href="https://www.facebook.com/nicolas.m.salcedo.9">
-          <image src={Icono2} alt="facebook" />
-        </a>
-        <a href="https://www.instagram.com/nickmuoz/">
-          <image src={Icono} alt="instagram" />
-        </a>
-        <a href="https://www.linkedin.com/in/nicolas-munoz-salcedo/">
-            <image src={Icono3} alt="linkedin" />
+      <br />
+      <br />
+      <footer>
+        <div>
+          <a href="https://www.facebook.com/nicolas.m.salcedo.9">
+            <img src={Icono2} alt="facebook" />
           </a>
-      </div>
+          <a href="https://www.instagram.com/nickmuoz/">
+            <img src={Icono} alt="instagram" />
+          </a>
+          <a href="https://www.linkedin.com/in/nicolas-munoz-salcedo/">
+            <img src={Icono3} alt="linkedin" />
+          </a>
+        </div>
         <span>
-        Hecho con &#128151; por<a href="https://nicolasmuozapp.netlify.app/"> Nicolas Muñoz</a>
+          Hecho con &#128151; por<a href="https://nicolasmuozapp.netlify.app/"> Nicolas Muñoz</a>
         </span>
-        </footer>
+      </footer>
     </div>
   );
 };
