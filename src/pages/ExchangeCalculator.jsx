@@ -76,9 +76,14 @@ const ExchangeCalculator = () => {
     } else {
       switch (currencyFrom) {
         case 'USD':
-          exchangeRate = exchangeRateUSDToBS;
+          exchangeRate = currencyTo === 'BS' ? exchangeRateUSDToBS : exchangeRateCOPToUSD;
           break;
-        // Add other cases for different currencies
+        case 'COP':
+          exchangeRate = currencyTo === 'USD' ? 1 / exchangeRateCOPToUSD : 1 / exchangeRateBStoCOP;
+          break;
+        case 'BS':
+          exchangeRate = currencyTo === 'USD' ? 1 / exchangeRateUSDToBS : exchangeRateBStoCOP;
+          break;
         default:
           setResult('Invalid currency selection.');
           return;
@@ -92,7 +97,18 @@ const ExchangeCalculator = () => {
       case 'BS_USD':
         convertedAmount = inputAmount / exchangeRate;
         break;
-      // Add other cases for different currency conversions
+      case 'COP_USD':
+        convertedAmount = inputAmount / exchangeRate;
+        break;
+      case 'USD_COP':
+        convertedAmount = inputAmount * exchangeRate;
+        break;
+      case 'COP_BS':
+        convertedAmount = inputAmount / exchangeRate;
+        break;
+      case 'BS_COP':
+        convertedAmount = inputAmount * exchangeRate;
+        break;
       default:
         setResult('Invalid conversion.');
         return;
