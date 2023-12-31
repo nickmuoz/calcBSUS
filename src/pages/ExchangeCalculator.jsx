@@ -8,8 +8,8 @@ const ExchangeCalculator = () => {
   const [currencyFrom, setCurrencyFrom] = useState('USD');
   const [currencyTo, setCurrencyTo] = useState('BS');
   const [exchangeRateUSDToBS, setExchangeRateUSDToBS] = useState(null);
-  const [exchangeRateCOPToUSD, setExchangeRateCOPToUSD] = useState(null);
-  const [exchangeRateBSToCOP, setExchangeRateBStoCOP] = useState(null);
+  const [exchangeRateUSDToCOP, setExchangeRateUSDToCOP] = useState(null);
+  const [exchangeRateBStoCOP, setExchangeRateBStoCOP] = useState(null);
   const [result, setResult] = useState('');
   const [exchangerateType, setExchangeRate] = useState({
     exchangeRatetype: 'OFICIAL'
@@ -23,9 +23,10 @@ const ExchangeCalculator = () => {
         const dataUSDToBS = await responseUSDToBS.json();
         setExchangeRateUSDToBS(dataUSDToBS.USDTOBOLIVAR);
 
-        const responseCOPToUSD = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
-        const dataCOPToUSD = await responseCOPToUSD.json();
-        setExchangeRateCOPToUSD(dataCOPToUSD.rates.COP);
+        const responseUSDToCOP = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+        const dataUSDToCOP = await responseUSDToCOP.json();
+        setExchangeRateUSDToCOP(dataUSDToCOP.rates.COP);
+        console.log(exchangeRateUSDToCOP)
 
         const responseCOPToBS = await fetch('https://api.exchangerate-api.com/v4/latest/VES');
         const dataCOPToBS = await responseCOPToBS.json();
@@ -38,12 +39,14 @@ const ExchangeCalculator = () => {
     fetchExchangeRates();
   }, []);
 
+//CHOOSE TYPE OF EXCHANGE RATE
   const handleExchangeRateTypeChange = (event) => {
     setExchangeRate({
       exchangeRatetype: event.target.value
     });
   };
 
+// SET MANUAL EXCHANGE RATE
   const handleManualExchangeRateChange = (event) => {
     setManualExchangeRate(event.target.value);
   };
@@ -62,34 +65,43 @@ const ExchangeCalculator = () => {
 
   const handleConvert = () => {
     const inputAmount = parseFloat(amount);
-
+  
     if (isNaN(inputAmount)) {
       setResult('Por Favor Ingrese un Numero Valido.');
       return;
     }
-
+  
     let convertedAmount;
     let exchangeRate;
-
+  
     if (exchangerateType.exchangeRatetype === 'MANUAL') {
       exchangeRate = parseFloat(manualExchangeRate);
     } else {
-      switch (currencyFrom) {
-        case 'USD':
-          exchangeRate = currencyTo === 'BS' ? exchangeRateUSDToBS : exchangeRateCOPToUSD;
+      switch (`${currencyFrom}_${currencyTo}`) {
+        case 'USD_BS':
+          exchangeRate = exchangeRateUSDToBS;
           break;
-        case 'COP':
-          exchangeRate = currencyTo === 'USD' ? 1 / exchangeRateCOPToUSD : 1 / exchangeRateBStoCOP;
+        case 'BS_USD':
+          exchangeRate = 1 / exchangeRateUSDToBS;
           break;
-        case 'BS':
-          exchangeRate = currencyTo === 'USD' ? 1 / exchangeRateUSDToBS : exchangeRateBStoCOP;
+        case 'COP_USD':
+          exchangeRate = 1 / exchangeRateUSDToCOP;
+          break;
+        case 'USD_COP':
+          exchangeRate = exchangeRateUSDToCOP;
+          break;
+        case 'COP_BS':
+          exchangeRate = exchangeRateBStoCOP;
+          break;
+        case 'BS_COP':
+          exchangeRate = 1 / exchangeRateBStoCOP;
           break;
         default:
-          setResult('Invalid currency selection.');
+          setResult('Invalid conversion.');
           return;
       }
     }
-
+  
     switch (`${currencyFrom}_${currencyTo}`) {
       case 'USD_BS':
         convertedAmount = inputAmount * exchangeRate;
@@ -98,7 +110,8 @@ const ExchangeCalculator = () => {
         convertedAmount = inputAmount / exchangeRate;
         break;
       case 'COP_USD':
-        convertedAmount = inputAmount / exchangeRate;
+        convertedAmount = inputAmount * exchangeRate;
+        console.log("este codigo esta en fucnionamiento")
         break;
       case 'USD_COP':
         convertedAmount = inputAmount * exchangeRate;
@@ -113,9 +126,10 @@ const ExchangeCalculator = () => {
         setResult('Invalid conversion.');
         return;
     }
-
+  
     setResult(`${inputAmount} ${currencyFrom} = ${convertedAmount.toFixed(3)} ${currencyTo}`);
   };
+  
 
   return (
     <div>
@@ -198,13 +212,13 @@ const ExchangeCalculator = () => {
       <br />
       <footer>
         <div>
-          <a href="https://www.facebook.com/nicolas.m.salcedo.9">
+          <a className="socialIcons" href="https://www.facebook.com/nicolas.m.salcedo.9">
             <img src={Icono2} alt="facebook" />
           </a>
-          <a href="https://www.instagram.com/nickmuoz/">
+          <a className="socialIcons" href="https://www.instagram.com/nickmuoz/">
             <img src={Icono} alt="instagram" />
           </a>
-          <a href="https://www.linkedin.com/in/nicolas-munoz-salcedo/">
+          <a className="socialIcons" href="https://www.linkedin.com/in/nicolas-munoz-salcedo/">
             <img src={Icono3} alt="linkedin" />
           </a>
         </div>
