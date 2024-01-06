@@ -9,7 +9,7 @@ const ExchangeCalculator = () => {
   const [currencyTo, setCurrencyTo] = useState('BS');
   const [exchangeRateUSDToBS, setExchangeRateUSDToBS] = useState(null);
   const [exchangeRateUSDToCOP, setExchangeRateUSDToCOP] = useState(null);
-  const [exchangeRateBStoCOP, setExchangeRateBStoCOP] = useState(null);
+  const [exchangeRateBSToCOP, setExchangeRateBStoCOP] = useState(null);
   const [result, setResult] = useState('');
   const [exchangerateType, setExchangeRate] = useState({
     exchangeRatetype: 'OFICIAL'
@@ -19,14 +19,13 @@ const ExchangeCalculator = () => {
   useEffect(() => {
     const fetchExchangeRates = async () => {
       try {
-        const responseUSDToBS = await fetch('https://apicalculadora.fly.dev/exchange/usd-bs');
+        const responseUSDToBS = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
         const dataUSDToBS = await responseUSDToBS.json();
-        setExchangeRateUSDToBS(dataUSDToBS.USDTOBOLIVAR);
+        setExchangeRateUSDToBS(dataUSDToBS.rates.VES);
 
         const responseUSDToCOP = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
         const dataUSDToCOP = await responseUSDToCOP.json();
         setExchangeRateUSDToCOP(dataUSDToCOP.rates.COP);
-        console.log(exchangeRateUSDToCOP)
 
         const responseCOPToBS = await fetch('https://api.exchangerate-api.com/v4/latest/VES');
         const dataCOPToBS = await responseCOPToBS.json();
@@ -38,6 +37,17 @@ const ExchangeCalculator = () => {
 
     fetchExchangeRates();
   }, []);
+
+  useEffect(() => {
+    console.log("Updated exchangeRateUSDToBS:", exchangeRateUSDToBS);
+  }, [exchangeRateUSDToBS]);
+  useEffect(() => {
+    console.log("Updated exchangeRateUSDToCOP:", exchangeRateUSDToCOP);
+  }, [exchangeRateUSDToCOP]);
+  useEffect(() => {
+    console.log("Updated exchangeRateBStoCOP:", exchangeRateBStoCOP);
+  }, [exchangeRateBStoCOP]);
+
 
 //CHOOSE TYPE OF EXCHANGE RATE
   const handleExchangeRateTypeChange = (event) => {
@@ -108,10 +118,10 @@ const ExchangeCalculator = () => {
         break;
       case 'BS_USD':
         convertedAmount = inputAmount / exchangeRate;
+        console.log("este codigo esta en funcionamiento")
         break;
       case 'COP_USD':
         convertedAmount = inputAmount * exchangeRate;
-        console.log("este codigo esta en fucnionamiento")
         break;
       case 'USD_COP':
         convertedAmount = inputAmount * exchangeRate;
