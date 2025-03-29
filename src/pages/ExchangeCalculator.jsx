@@ -45,8 +45,8 @@ const ExchangeCalculator = () => {
     console.log("Updated exchangeRateUSDToCOP:", exchangeRateUSDToCOP);
   }, [exchangeRateUSDToCOP]);
   useEffect(() => {
-    console.log("Updated exchangeRateBStoCOP:", exchangeRateBStoCOP);
-  }, [exchangeRateBStoCOP]);
+    console.log("Updated exchangeRateBStoCOP:", exchangeRateBSToCOP);
+  }, [exchangeRateBSToCOP]);
 
 
 //CHOOSE TYPE OF EXCHANGE RATE
@@ -101,10 +101,10 @@ const ExchangeCalculator = () => {
           exchangeRate = exchangeRateUSDToCOP;
           break;
         case 'COP_BS':
-          exchangeRate = exchangeRateBStoCOP;
+          exchangeRate = exchangeRateBSToCOP;
           break;
         case 'BS_COP':
-          exchangeRate = 1 / exchangeRateBStoCOP;
+          exchangeRate = 1 / exchangeRateBSToCOP;
           break;
         default:
           setResult('Invalid conversion.');
